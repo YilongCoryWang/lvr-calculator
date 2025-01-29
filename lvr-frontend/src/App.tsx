@@ -19,6 +19,7 @@ function App() {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
   const [showEvidence, setShowEvidence] = useState<boolean>(false);
   const [lvr, setLvr] = useState<number | null>(null);
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
 
   const {
     register,
@@ -26,8 +27,17 @@ function App() {
     handleSubmit,
   } = useForm();
 
-  const debounced = useDebouncedCallback((field, v) => {
-    const value = parseInt(v);
+  const uploadPropertyValueEvidence = (
+    e: React.FormEvent<HTMLInputElement>
+  ) => {
+    const target = e.target as HTMLInputElement & {
+      files: FileList;
+    };
+    console.log(target.files[0]);
+    setEvidenceFile(target.files[0]);
+  };
+
+  const debounced = useDebouncedCallback((field, value) => {
     switch (field) {
       case "estPropVal":
         setEstPropValue(value);
@@ -42,6 +52,9 @@ function App() {
       case "cashOutAmt":
         setCashOutAmt(value);
         break;
+      case "propValEvd":
+        uploadPropertyValueEvidence(value);
+        break;
 
       default:
         break;
@@ -50,13 +63,18 @@ function App() {
 
   const onSubmit = async () => {
     if (lvr && lvr > 90) {
+      const form = new FormData();
+      form.append("estLoanValue", estLoanValue.toString());
+      form.append("cashOutAmt", cashOutAmt.toString());
+      if (propValuePhy > 0) {
+        form.append("propertyValue", propValuePhy.toString());
+        if (evidenceFile) form.append("evidence", evidenceFile);
+      } else {
+        form.append("propertyValue", estPropValue.toString());
+      }
+
       const url = import.meta.env.VITE_LVR_URL;
-      const payload = {
-        estLoanValue,
-        cashOutAmt,
-        propertyValue: propValuePhy > 0 ? propValuePhy : estPropValue,
-      };
-      await axios.post(url, payload);
+      await axios.post(url, form);
       return;
     }
   };
@@ -146,7 +164,9 @@ function App() {
             label={`Estimated Property Value (A$${MIN_PROPERTY_VALUE} to A$
               ${MAX_PROPERTY_VALUE}) (required)`}
             errors={errors}
-            onChangeHandler={(e) => debounced("estPropVal", e.target.value)}
+            onChangeHandler={(e) =>
+              debounced("estPropVal", parseInt(e.target.value))
+            }
             placeholder="* Enter Estimated Property Value"
           />
 
@@ -167,7 +187,9 @@ function App() {
             })}
             label={`Estimated Loan Value (A$${MIN_LOAN} to A$${MAX_LOAN}) (required)`}
             errors={errors}
-            onChangeHandler={(e) => debounced("estLoanVal", e.target.value)}
+            onChangeHandler={(e) =>
+              debounced("estLoanVal", parseInt(e.target.value))
+            }
             placeholder="* Enter Estimated Loan Value"
           />
 
@@ -187,7 +209,9 @@ function App() {
             })}
             label="Cash Out Amount"
             errors={errors}
-            onChangeHandler={(e) => debounced("cashOutAmt", e.target.value)}
+            onChangeHandler={(e) =>
+              debounced("cashOutAmt", parseInt(e.target.value))
+            }
             placeholder="* Enter Cash Out Amount"
           />
 
@@ -199,7 +223,7 @@ function App() {
             label="Property Valuation (Physical)"
             errors={errors}
             onChangeHandler={(e) =>
-              debounced("propValPhysical", e.target.value)
+              debounced("propValPhysical", parseInt(e.target.value))
             }
             placeholder="* Enter Property Valuation (Physical)"
           />
@@ -212,7 +236,7 @@ function App() {
               options={register("propValEvd")}
               label="Property Valuation Evidence (required)"
               errors={errors}
-              onChangeHandler={(e) => debounced("propValEvd", e.target.value)}
+              onChangeHandler={(e) => debounced("propValEvd", e)}
               placeholder="Property Valuation Evidence"
             />
           )}
