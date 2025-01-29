@@ -1,0 +1,26 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+lvr-frontend/node_modules
+lvr-backend/node_modules
+lvr-frontend/*.env
+lvr-backend/*.env
+
+# testing
+lvr-frontend/coverage
+lvr-backend/coverage
+
+# production
+lvr-frontend/build
+lvr-backend/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
