@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 import Input from "./component/Input";
+import {
+  MIN_PROPERTY_VALUE,
+  MAX_PROPERTY_VALUE,
+  MIN_LOAN,
+  MAX_LOAN,
+  INPUT_DELAY,
+} from "./utils/constants.ts";
 
 function App() {
   const [estPropValue, setEstPropValue] = useState<number>(0);
@@ -18,11 +25,6 @@ function App() {
     formState: { errors },
     handleSubmit,
   } = useForm();
-  const minPropertyValue = 100000;
-  const maxPropertyValue = 2500000;
-  const minLoan = 80000;
-  const maxLoan = 2000000;
-  const inputDelay = 1000;
 
   const debounced = useDebouncedCallback((field, v) => {
     const value = parseInt(v);
@@ -44,7 +46,7 @@ function App() {
       default:
         break;
     }
-  }, inputDelay);
+  }, INPUT_DELAY);
 
   const onSubmit = async () => {
     if (lvr && lvr > 90) {
@@ -75,10 +77,10 @@ function App() {
     const getLVR = async () => {
       try {
         if (
-          estLoanValue >= minLoan &&
-          estLoanValue <= maxLoan &&
-          ((estPropValue >= minPropertyValue &&
-            estPropValue <= maxPropertyValue) ||
+          estLoanValue >= MIN_LOAN &&
+          estLoanValue <= MAX_LOAN &&
+          ((estPropValue >= MIN_PROPERTY_VALUE &&
+            estPropValue <= MAX_PROPERTY_VALUE) ||
             propValuePhy > 0)
         ) {
           const payload = {
@@ -138,11 +140,11 @@ function App() {
             type="number"
             options={register("estPropVal", {
               required: "This field is required",
-              min: minPropertyValue,
-              max: maxPropertyValue,
+              min: MIN_PROPERTY_VALUE,
+              max: MAX_PROPERTY_VALUE,
             })}
-            label={`Estimated Property Value (A$${minPropertyValue} to A$
-              ${maxPropertyValue}) (required)`}
+            label={`Estimated Property Value (A$${MIN_PROPERTY_VALUE} to A$
+              ${MAX_PROPERTY_VALUE}) (required)`}
             errors={errors}
             onChangeHandler={(e) => debounced("estPropVal", e.target.value)}
             placeholder="* Enter Estimated Property Value"
@@ -155,15 +157,15 @@ function App() {
             options={register("estLoanVal", {
               required: "This field is required",
               min: {
-                value: minLoan,
-                message: `Must be greater than ${minLoan}`,
+                value: MIN_LOAN,
+                message: `Must be greater than ${MIN_LOAN}`,
               },
               max: {
-                value: maxLoan,
-                message: `Must be less than ${maxLoan}`,
+                value: MAX_LOAN,
+                message: `Must be less than ${MAX_LOAN}`,
               },
             })}
-            label={`Estimated Loan Value (A$${minLoan} to A$${maxLoan}) (required)`}
+            label={`Estimated Loan Value (A$${MIN_LOAN} to A$${MAX_LOAN}) (required)`}
             errors={errors}
             onChangeHandler={(e) => debounced("estLoanVal", e.target.value)}
             placeholder="* Enter Estimated Loan Value"
