@@ -6,7 +6,7 @@ import {
   UseFormRegisterReturn,
 } from "react-hook-form";
 
-describe("App", () => {
+describe("Input", () => {
   it("renders the Input component", () => {
     const errors: FieldErrors<FieldValues> = {};
 

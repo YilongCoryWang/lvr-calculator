@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FieldValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useDebouncedCallback } from "use-debounce";
 import Input from "./component/Input";
 
@@ -211,7 +211,7 @@ function App() {
               label="Property Valuation Evidence (required)"
               errors={errors}
               onChangeHandler={(e) => debounced("propValEvd", e.target.value)}
-              placeholder=""
+              placeholder="Property Valuation Evidence"
             />
           )}
 
