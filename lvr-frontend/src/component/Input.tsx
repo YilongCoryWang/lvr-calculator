@@ -42,7 +42,7 @@ function Input({
         errors={errors}
         name={id}
         render={({ message }: { message: string }) => (
-          <p style={{ color: "#bf1650" }}>{message}</p>
+          <p className="text-red-600">{message}</p>
         )}
       />
     </div>

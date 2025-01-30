@@ -20,6 +20,7 @@ function App() {
   const [showEvidence, setShowEvidence] = useState<boolean>(false);
   const [lvr, setLvr] = useState<number | null>(null);
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -50,7 +51,7 @@ function App() {
         onPropValChange(value);
         break;
       case "cashOutAmt":
-        setCashOutAmt(value);
+        setCashOutAmt(value ? value : 0);
         break;
       case "propValEvd":
         uploadPropertyValueEvidence(value);
@@ -94,6 +95,13 @@ function App() {
   useEffect(() => {
     const getLVR = async () => {
       try {
+        if (propValuePhy < 0) {
+          setLvr(null);
+          setError("Property Valuation (Physical) should be greater than 0");
+          return setIsSubmitDisabled(true);
+        }
+
+        setError(null);
         if (
           estLoanValue >= MIN_LOAN &&
           estLoanValue <= MAX_LOAN &&
@@ -101,31 +109,39 @@ function App() {
             estPropValue <= MAX_PROPERTY_VALUE) ||
             propValuePhy > 0)
         ) {
-          const payload = {
-            estLoanValue,
-            cashOutAmt,
-            propertyValue: propValuePhy > 0 ? propValuePhy : estPropValue,
-          };
-          const res = await axios.post(
-            "http://localhost:9000/api/v1/lvr",
-            payload
-          );
-          if (res.status === 200) {
-            const {
-              data: { lvr },
-            } = res;
+          const cashOut = cashOutAmt ? cashOutAmt : 0;
+          const propertyValue = propValuePhy > 0 ? propValuePhy : estPropValue;
+          const url = `http://localhost:9000/api/v1/lvr?estLoanValue=${estLoanValue}&cashOutAmt=${cashOut}&propertyValue=${propertyValue}`;
+          const res = await axios.get(url);
+          const {
+            data: { lvr },
+          } = res;
 
-            setLvr(lvr);
+          setLvr(lvr);
 
-            if (lvr && lvr > 90) {
-              return setIsSubmitDisabled(false);
-            }
-            setIsSubmitDisabled(true);
+          if (lvr && lvr > 90) {
+            return setIsSubmitDisabled(false);
           }
+          setIsSubmitDisabled(true);
         } else if (false === isSubmitDisabled) {
           setIsSubmitDisabled(true);
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        setLvr(null);
+        if (
+          error &&
+          typeof error === "object" &&
+          "response" in error &&
+          error.response &&
+          typeof error.response === "object" &&
+          "data" in error.response &&
+          error.response.data &&
+          typeof error.response.data === "object" &&
+          "message" in error.response.data &&
+          typeof error.response.data.message === "string"
+        ) {
+          setError(error.response.data.message);
+        }
         console.error(error);
       }
     };
@@ -147,6 +163,11 @@ function App() {
           <p className="max-w-sm mb-6 font-sans font-light text-gray-600">
             Please fill in the form and calculate Loan to Value Ratio.
           </p>
+          {error && (
+            <p className="font-mono mb-5 text-xl font-semibold text-red-600">
+              {error}
+            </p>
+          )}
           {lvr && (
             <p className="font-mono mb-5 text-3xl font-semibold">
               Your LVR is: {lvr}%
