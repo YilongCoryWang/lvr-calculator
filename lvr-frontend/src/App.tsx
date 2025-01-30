@@ -67,13 +67,10 @@ function App() {
       const form = new FormData();
       form.append("estLoanValue", estLoanValue.toString());
       form.append("cashOutAmt", cashOutAmt.toString());
-      if (propValuePhy > 0) {
-        form.append("propertyValue", propValuePhy.toString());
-        if (evidenceFile) form.append("evidence", evidenceFile);
-      } else {
-        form.append("propertyValue", estPropValue.toString());
-      }
-
+      if (propValuePhy && propValuePhy > 0)
+        form.append("propValuePhy", propValuePhy.toString());
+      form.append("estPropValue", estPropValue.toString());
+      if (evidenceFile) form.append("evidence", evidenceFile);
       await axios.post(baseUrl, form);
 
       return;
@@ -93,6 +90,10 @@ function App() {
   };
 
   useEffect(() => {
+    setError(null);
+  }, []);
+
+  useEffect(() => {
     const getLVR = async () => {
       try {
         if (propValuePhy < 0) {
@@ -109,9 +110,13 @@ function App() {
             estPropValue <= MAX_PROPERTY_VALUE) ||
             propValuePhy > 0)
         ) {
-          const cashOut = cashOutAmt ? cashOutAmt : 0;
-          const propertyValue = propValuePhy > 0 ? propValuePhy : estPropValue;
-          const url = `${baseUrl}?estLoanValue=${estLoanValue}&cashOutAmt=${cashOut}&propertyValue=${propertyValue}`;
+          let url = `${baseUrl}?estLoanValue=${estLoanValue}&estPropValue=${estPropValue}`;
+          if (propValuePhy) {
+            url = url + `&propValuePhy=${propValuePhy}`;
+          }
+          if (cashOutAmt) {
+            url = url + `&cashOutAmt=${cashOutAmt}`;
+          }
           const res = await axios.get(url);
           const {
             data: { lvr },
@@ -147,7 +152,14 @@ function App() {
     };
 
     getLVR();
-  }, [cashOutAmt, estPropValue, estLoanValue, propValuePhy, isSubmitDisabled]);
+  }, [
+    cashOutAmt,
+    estPropValue,
+    estLoanValue,
+    propValuePhy,
+    isSubmitDisabled,
+    baseUrl,
+  ]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-rose-50">
@@ -254,7 +266,10 @@ function App() {
               key="propValEvd"
               id="propValEvd"
               type="file"
-              options={register("propValEvd")}
+              options={register("propValEvd", {
+                required:
+                  propValuePhy > 0 ? "Evidence file is required" : false,
+              })}
               label="Property Valuation Evidence (required)"
               errors={errors}
               onChangeHandler={(e) => debounced("propValEvd", e)}

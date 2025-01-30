@@ -10,6 +10,6 @@ const router = Router();
 router
   .route("/lvr")
   .get(checkParams, calcLVR)
-  .post(checkParams, uploadPropertyValueEvidence, createLVR);
+  .post(uploadPropertyValueEvidence, checkParams, createLVR);
 
 export default router;
