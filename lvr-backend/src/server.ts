@@ -3,8 +3,20 @@ import cors from "cors";
 import lvrRouter from "./routes/v1/lvrRouter";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerui from "swagger-ui-express";
+import winston from "winston";
 
 const app = express();
+
+export const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.json(),
+  defaultMeta: { service: "user-service" },
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
+  ],
+});
 
 app.use(cors());
 app.use(express.json({ limit: "10kb" }));
@@ -31,7 +43,7 @@ app.all("*", (req, res, next) => {
 
 app.listen(9000, (error) => {
   if (error) {
-    console.error(error.message);
+    logger.error(error.message);
   }
-  console.log("Server is running at port 9000");
+  logger.info("Server is running at port 9000");
 });

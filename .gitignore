@@ -5,6 +5,7 @@ lvr-frontend/node_modules
 lvr-backend/node_modules
 lvr-frontend/*.env
 lvr-backend/*.env
+lvr-backend/*.log
 
 # testing
 lvr-frontend/coverage

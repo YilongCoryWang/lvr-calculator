@@ -6,6 +6,7 @@ import {
   MIN_LOAN,
   MAX_LOAN,
 } from "../utils/constants";
+import { logger } from "../server";
 
 export const checkParams = (
   req: Request,
@@ -26,15 +27,15 @@ export const checkParams = (
     evidenceFile = req.body.evidence;
   }
 
-  console.log(req.query, req.method, req.body);
-
   if (propValuePhy) {
     if (parseInt(propValuePhy as string) < 0) {
+      logger.error("Property value (physical) invalid:" + propValuePhy);
       res
         .status(400)
         .json({ message: "Property value (physical) invalid:" + propValuePhy });
       return;
     } else if (!evidenceFile && req.method === "POST") {
+      logger.error("Property value (physical) evidence is missing");
       res
         .status(400)
         .json({ message: "Property value (physical) evidence is missing" });
@@ -47,6 +48,7 @@ export const checkParams = (
     parseInt(estPropValue as string) < MIN_PROPERTY_VALUE ||
     parseInt(estPropValue as string) > MAX_PROPERTY_VALUE
   ) {
+    logger.error("Estimated property value invalid:" + estPropValue);
     res
       .status(400)
       .json({ message: "Estimated property value invalid:" + estPropValue });
@@ -58,6 +60,7 @@ export const checkParams = (
     parseInt(estLoanValue as string) < MIN_LOAN ||
     parseInt(estLoanValue as string) > MAX_LOAN
   ) {
+    logger.error("Estimated loan value invalid:" + estLoanValue);
     res
       .status(400)
       .json({ message: "Estimated loan value invalid:" + estLoanValue });
@@ -65,6 +68,7 @@ export const checkParams = (
   }
 
   if (cashOutAmt && parseInt(cashOutAmt as string) < 0) {
+    logger.error("Cash out value invalid:" + cashOutAmt);
     res.status(400).json({ message: "Cash out value invalid:" + cashOutAmt });
     return;
   }
@@ -114,6 +118,6 @@ const upload = multer({ storage, fileFilter });
 export const uploadPropertyValueEvidence = upload.single("evidence");
 
 export const createLVR = (req: Request, res: Response) => {
-  console.log("Create and store LVR with data:", req.body);
+  logger.info("Create and store LVR with data:", req.body);
   res.json({ message: "LVR created" });
 };
