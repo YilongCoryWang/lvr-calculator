@@ -1,7 +1,15 @@
 import { Router } from "express";
-import { calcLVR, checkParams } from "../../controller/lvrController";
+import {
+  calcLVR,
+  checkParams,
+  createLVR,
+  uploadPropertyValueEvidence,
+} from "../../controller/lvrController";
 
 const router = Router();
-router.get("/lvr", checkParams, calcLVR);
+router
+  .route("/lvr")
+  .get(checkParams, calcLVR)
+  .post(checkParams, uploadPropertyValueEvidence, createLVR);
 
 export default router;

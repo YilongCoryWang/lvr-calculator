@@ -21,6 +21,7 @@ function App() {
   const [lvr, setLvr] = useState<number | null>(null);
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const baseUrl = import.meta.env.VITE_LVR_URL;
 
   const {
     register,
@@ -34,7 +35,6 @@ function App() {
     const target = e.target as HTMLInputElement & {
       files: FileList;
     };
-    console.log(target.files[0]);
     setEvidenceFile(target.files[0]);
   };
 
@@ -63,7 +63,7 @@ function App() {
   }, INPUT_DELAY);
 
   const onSubmit = async () => {
-    if (lvr && lvr > 90) {
+    if (lvr && lvr < 90) {
       const form = new FormData();
       form.append("estLoanValue", estLoanValue.toString());
       form.append("cashOutAmt", cashOutAmt.toString());
@@ -74,8 +74,8 @@ function App() {
         form.append("propertyValue", estPropValue.toString());
       }
 
-      const url = import.meta.env.VITE_LVR_URL;
-      await axios.post(url, form);
+      await axios.post(baseUrl, form);
+
       return;
     }
   };
@@ -111,7 +111,7 @@ function App() {
         ) {
           const cashOut = cashOutAmt ? cashOutAmt : 0;
           const propertyValue = propValuePhy > 0 ? propValuePhy : estPropValue;
-          const url = `http://localhost:9000/api/v1/lvr?estLoanValue=${estLoanValue}&cashOutAmt=${cashOut}&propertyValue=${propertyValue}`;
+          const url = `${baseUrl}?estLoanValue=${estLoanValue}&cashOutAmt=${cashOut}&propertyValue=${propertyValue}`;
           const res = await axios.get(url);
           const {
             data: { lvr },
@@ -119,7 +119,7 @@ function App() {
 
           setLvr(lvr);
 
-          if (lvr && lvr > 90) {
+          if (lvr && lvr < 90) {
             return setIsSubmitDisabled(false);
           }
           setIsSubmitDisabled(true);
