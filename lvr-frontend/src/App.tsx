@@ -27,7 +27,7 @@ function App() {
     register,
     formState: { errors },
     handleSubmit,
-  } = useForm();
+  } = useForm({ mode: "onTouched" });
 
   const uploadPropertyValueEvidence = (
     e: React.FormEvent<HTMLInputElement>
@@ -191,15 +191,20 @@ function App() {
             type="number"
             options={register("estPropVal", {
               required: "This field is required",
-              min: MIN_PROPERTY_VALUE,
-              max: MAX_PROPERTY_VALUE,
+              min: {
+                value: MIN_PROPERTY_VALUE,
+                message: `Value must be at least ${MIN_PROPERTY_VALUE}`,
+              },
+              max: {
+                value: MAX_PROPERTY_VALUE,
+                message: `Value must not exceed ${MAX_PROPERTY_VALUE}`,
+              },
+              onChange: (e) =>
+                debounced("estPropVal", parseInt(e.target.value)),
             })}
             label={`Estimated Property Value (A$${MIN_PROPERTY_VALUE} to A$
               ${MAX_PROPERTY_VALUE}) (required)`}
             errors={errors}
-            onChangeHandler={(e) =>
-              debounced("estPropVal", parseInt(e.target.value))
-            }
             placeholder="* Enter Estimated Property Value"
           />
 
@@ -217,12 +222,11 @@ function App() {
                 value: MAX_LOAN,
                 message: `Must be less than ${MAX_LOAN}`,
               },
+              onChange: (e) =>
+                debounced("estLoanVal", parseInt(e.target.value)),
             })}
             label={`Estimated Loan Value (A$${MIN_LOAN} to A$${MAX_LOAN}) (required)`}
             errors={errors}
-            onChangeHandler={(e) =>
-              debounced("estLoanVal", parseInt(e.target.value))
-            }
             placeholder="* Enter Estimated Loan Value"
           />
 
@@ -239,12 +243,11 @@ function App() {
                 value: estPropValue * 0.5,
                 message: `Must be less than half of property value`,
               },
+              onChange: (e) =>
+                debounced("cashOutAmt", parseInt(e.target.value)),
             })}
             label="Cash Out Amount"
             errors={errors}
-            onChangeHandler={(e) =>
-              debounced("cashOutAmt", parseInt(e.target.value))
-            }
             placeholder="* Enter Cash Out Amount"
           />
 
@@ -252,12 +255,12 @@ function App() {
             key="propValPhysical"
             id="propValPhysical"
             type="number"
-            options={register("propValPhysical")}
+            options={register("propValPhysical", {
+              onChange: (e) =>
+                debounced("propValPhysical", parseInt(e.target.value)),
+            })}
             label="Property Valuation (Physical)"
             errors={errors}
-            onChangeHandler={(e) =>
-              debounced("propValPhysical", parseInt(e.target.value))
-            }
             placeholder="* Enter Property Valuation (Physical)"
           />
 
@@ -269,10 +272,10 @@ function App() {
               options={register("propValEvd", {
                 required:
                   propValuePhy > 0 ? "Evidence file is required" : false,
+                onChange: (e) => debounced("propValEvd", e),
               })}
               label="Property Valuation Evidence (required)"
               errors={errors}
-              onChangeHandler={(e) => debounced("propValEvd", e)}
               placeholder="Property Valuation Evidence"
             />
           )}

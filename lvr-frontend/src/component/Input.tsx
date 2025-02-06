@@ -1,5 +1,4 @@
 import { ErrorMessage } from "@hookform/error-message";
-import React from "react";
 import {
   FieldErrors,
   FieldValues,
@@ -13,18 +12,10 @@ type InputProps = {
   options: UseFormRegisterReturn;
   placeholder: string;
   errors: FieldErrors<FieldValues>;
-  onChangeHandler: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-function Input({
-  id,
-  type,
-  label,
-  options,
-  placeholder,
-  errors,
-  onChangeHandler,
-}: InputProps) {
+function Input({ id, type, label, options, placeholder, errors }: InputProps) {
+  console.log("errors", errors);
   return (
     <div>
       <label htmlFor={id} className="font-semibold">
@@ -36,7 +27,6 @@ function Input({
         className="w-full p-3 border border-gray-300 rounded-md placeholder:font-sans placeholder:font-light bg-white"
         placeholder={placeholder}
         id={id}
-        onChange={onChangeHandler}
       />
       <ErrorMessage
         errors={errors}
